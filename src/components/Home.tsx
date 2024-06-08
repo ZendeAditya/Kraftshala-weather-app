@@ -5,14 +5,24 @@ import { Button } from "./ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { IoLocationOutline } from "react-icons/io5";
 import { CiTempHigh, CiTimer } from "react-icons/ci";
+import { WiHumidity } from "react-icons/wi";
+import { FaWind } from "react-icons/fa";
+import { CiCircleInfo } from "react-icons/ci";
+import Info from "./Info";
+
 const extractWeatherInfo = (data: {
   name: any;
   main: any;
   dt: any;
   timezone: any;
+  wind: any;
+  weather: any;
 }) => {
-  const { name, main, dt, timezone } = data;
-  const currentTemperature = main.temp;
+  const { name, main, dt, timezone, wind, weather } = data;
+  const currentTemperature = main.temp.toFixed(2) - 273.15;
+  const humidity = main.humidity;
+  const windSpeed = wind.speed;
+  const weatherDescription = weather[0].description;
   const timestamp = dt * 1000;
   const currentDate = new Date(timestamp);
   const timezoneOffset = timezone * 1000;
@@ -28,9 +38,11 @@ const extractWeatherInfo = (data: {
 
   return {
     location: name,
+    humidity: humidity,
+    windSpeed: windSpeed,
+    weatherDescription: weatherDescription,
     temperature: currentTemperature,
     date: formattedDate,
-    timezone: currentLocalTime.getTimezoneOffset() / -60,
   };
 };
 
@@ -38,6 +50,7 @@ const HomeApp = () => {
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [weatherInfo, setWeatherInfo] = useState<any>(null);
+
   const getWeatherDataByCity = async (city: string) => {
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=261df3c79b24b2012e30a6968685274e`
@@ -101,18 +114,32 @@ const HomeApp = () => {
       <div>
         {weatherInfo && (
           <div className="py-4">
-            <div className="flex items-center justify-normal gap-4 text-2xl py-3">
-              <IoLocationOutline size={30} />
-              <h2>{weatherInfo.location}</h2>
-            </div>
-            <div className="flex items-center justify-normal gap-4 text-2xl py-3">
-              <CiTempHigh />{" "}
-              <h2>{(weatherInfo.temperature - 273.15).toFixed(2)} °C</h2>
-            </div>
-            <div className="flex items-center justify-normal gap-4 text-2xl py-3">
-              <CiTimer />
-              <h2>{weatherInfo.date}</h2>{" "}
-            </div>
+            <Info
+              icon={<IoLocationOutline size={30} />}
+              text="Location"
+              value={weatherInfo.location}
+            />
+            <Info
+              icon={<CiTempHigh />}
+              text="Temperature(°C)"
+              value={weatherInfo.temperature.toFixed(2)}
+            />
+            <Info icon={<CiTimer />} text="Date" value={weatherInfo.date} />
+            <Info
+              icon={<WiHumidity />}
+              text="Humidity"
+              value={weatherInfo.humidity}
+            />
+            <Info
+              icon={<FaWind />}
+              text="Wind Speed"
+              value={weatherInfo.windSpeed}
+            />
+            <Info
+              icon={<CiCircleInfo />}
+              text="Description"
+              value={weatherInfo.weatherDescription}
+            />
           </div>
         )}
       </div>
