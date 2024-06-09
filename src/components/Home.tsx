@@ -17,11 +17,13 @@ const extractWeatherInfo = (data: {
   timezone: any;
   wind: any;
   weather: any;
+  sys:any;
 }) => {
-  const { name, main, dt, timezone, wind, weather } = data;
+  const { name, main, dt, timezone, wind, weather,sys } = data;
   const currentTemperature = main.temp.toFixed(2) - 273.15;
   const humidity = main.humidity;
   const windSpeed = wind.speed;
+  const country = sys.country;
   const weatherDescription = weather[0].description;
   const timestamp = dt * 1000;
   const currentDate = new Date(timestamp);
@@ -43,6 +45,7 @@ const extractWeatherInfo = (data: {
     weatherDescription: weatherDescription,
     temperature: currentTemperature,
     date: formattedDate,
+    country:country
   };
 };
 
@@ -117,7 +120,7 @@ const HomeApp = () => {
             <Info
               icon={<IoLocationOutline size={30} />}
               text="Location"
-              value={weatherInfo.location}
+              value={`${weatherInfo.location}, ${weatherInfo.country}`}
             />
             <Info
               icon={<CiTempHigh />}
